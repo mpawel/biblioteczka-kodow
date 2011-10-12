@@ -38,9 +38,7 @@ struct Gt {
   int size() {return v.size();}
 };
 
-char data_begin[0];
 Gt G;
-char data_end[0];
 
 int bellman_ford(int start, Ct* dist, int* prev) {
   int nv = G.size();
@@ -466,7 +464,6 @@ int main(int argc, char *argv[])
   int t;
   scanf("%d", &t);
   while(t-->0) {
-    memset(data_begin, 0,  data_end - data_begin);
     int nV,nE;
     scanf("%d%d", &nV, &nE);
     for (int i=0; i<nV; ++i) {
