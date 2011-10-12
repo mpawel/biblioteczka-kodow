@@ -11,7 +11,6 @@ using namespace std;
 
 /*** Rabin-Karp ***/
 
-/* return a^p mod m */
 int64_t mod(int a,int p,int m){
      if (p == 0) return 1;
      int64_t sqr = mod(a,p/2,m) % m;
@@ -20,9 +19,8 @@ int64_t mod(int a,int p,int m){
      else return sqr;
 }
 
-void RabinKarpMatch(char *T,char *P,int d,int q)
-{
-     int64_t i,j,p,t,n,m,h,found;
+void rk(char *T,char *P,int d,int q) {
+     int64_t i,j,p,t,n,m,h,match;
      n = strlen(T);
      m = strlen(P);
      h = mod(d,m-1,q);
@@ -35,23 +33,22 @@ void RabinKarpMatch(char *T,char *P,int d,int q)
 
      for (i=0; i<=n-m; i++)     {
 	  if (p == t)     {
-	       found = 1;
+	       match = 1;
 	       for (j=0; j<m; j++)
 		   if (P[j] != T[i+j])    {
-		       found = 0;
+		       match = 0;
 		       break;
 		   }
-	       if (found) printf("%d\n",i);
+	       if (match) printf("%Ld\n",i);
 	  } else
 	       t = (d*(t - ((tonum(T[i])*h) % q)) + tonum(T[i+m])) % q;
      }
-//     return -1;
 }
 
 
 /*** Boyer-Moore ***/
 
-void preBmBc(const char *x, int m, int bmBc[]) {
+void pre_badcharacter(const char *x, int m, int bmBc[]) {
    int i;
 
    for (i = 0; i < ALPHABET_SIZE; ++i)
@@ -60,7 +57,7 @@ void preBmBc(const char *x, int m, int bmBc[]) {
       bmBc[x[i]] = m - i - 1;
 }
 
-void suffixes(const char *x, int m, int *suff) {
+void compute_suffix(const char *x, int m, int *suff) {
    int f, g, i;
 
    suff[m - 1] = m;
@@ -79,10 +76,10 @@ void suffixes(const char *x, int m, int *suff) {
    }
 }
 
-void preBmGs(const char *x, int m, int bmGs[]) {
+void pre_suffix(const char *x, int m, int bmGs[]) {
    int i, j, suff[m];
 
-   suffixes(x, m, suff);
+   compute_suffix(x, m, suff);
 
    for (i = 0; i < m; ++i)
       bmGs[i] = m;
@@ -97,54 +94,54 @@ void preBmGs(const char *x, int m, int bmGs[]) {
 }
 
 
-void bm(const char *P, int m, char *T, int64_t n) {
+void bm(const char *P, int m,const  char *T, int64_t n) {
 
-   int i, j, bmGs[m], bmBc[ALPHABET_SIZE];
+   int i, j, suffix[m], bad_character[ALPHABET_SIZE];
 
-   /* Preprocessing */
-   preBmGs(P, m, bmGs);
-   preBmBc(P, m, bmBc);
+   pre_suffix(P, m, suffix);
+   pre_badcharacter(P, m, bad_character);
 
-   /* Searching */
    j = 0;
    while (j <= n - m) {
-      for (i = m - 1; i >= 0 && P[i] == T[i + j]; --i);
+      for (i = m - 1 ;  i >= 0 && P[i] == T[i + j] ; --i) ;
       if (i < 0) {
 	 printf("%d\n",j);
-	 j += bmGs[0];
+	 j += suffix[0];
       }
       else
-	 j += max(bmGs[i], bmBc[T[i + j]] - m + 1 + i);
+	 j += max(suffix[i], bad_character[T[i + j]] - m + 1 + i);
    }
 }
 
 /***  Knuth–Morris–Pratt  ***/
 void compute_prefix (const char * P, int * pref, int n ) {
+
     pref[1]=0;
-    int k=0,q=0;
-    for (uint32_t q=2; q<=n;q++) {
-	while (k &&  P[k+1]!=P[q])
+    int k=0;
+    for (int64_t q=1 ;  q<n ; q++ ) {
+	while (k > 0 &&  P[k]!=P[q])
 	    k=pref[k];
-	if(P[k+1]==P[q])
-	    k=k+1;
-	pref[q]=k;
+	if(P[k] == P[q])
+	    k++;
+	pref[q+1]=k;
     }
 }
 
 void kmp ( const char * P, int plen, const char *T, int tlen) {
 
-    int pref[plen];
+    int pref[plen+1];
+    pref[0]=0;
     compute_prefix(P,pref, plen);
 
-    int q=0;
-    for ( uint32_t i=1;i<=tlen; i++) {
-	while( q &&  P[q+1]!=T[i])
-	    q=pref[q];
-	if(P[q+1]==T[i])
-		q=q+1;
-	    if (q==plen) {
-		printf("%d\n", i-q);
-		q=pref[q];
+    int k=0;
+    for ( int64_t i=0;i<tlen; i++) {
+	while( k>0  &&  P[k]!=T[i] )
+	    k=pref[k];
+	if(P[k]==T[i])
+		k++;
+	    if (k==plen) {
+		printf("%ld\n",i-plen+1);
+		k=pref[k];
 	    }
     }
 }
@@ -160,12 +157,11 @@ int main () {
 	int n;
 	scanf("%d",&n);
 	char p[n+1], t[5000000];
-	//indeksowanie znaków w napisach 1..n
-	scanf("%s\n",p+1);
-	scanf("%s\n",t+1);
-	p[0]='\0';
-//	kmp(p,n,t,strlen(t+1));
-//	bm(p+1,n,t+1,strlen(t+1));
-	RabinKarpMatch(t+1,p+1,10,UINT_MAX);
+	scanf("%s\n",p);
+	scanf("%s\n",t);
+
+	kmp(p,n,t,strlen(t));
+	bm(p,n,t,strlen(t));
+	rk(t,p,10,UINT_MAX);
     }
 }
