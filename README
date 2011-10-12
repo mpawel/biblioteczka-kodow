@@ -1,1 +1,25 @@
-biblioteczka kodow
+Kody mogą zostać automatycznie przetworzone za pomocą make. Szczegóły
+całego procesu w pliku Makefile. Po wywołaniu polecenia make, pliki
+postscript powinny znaleźć się w katalogu "postscript".
+
+Katalogi:
+ in - pliki wejściowe do testów
+ scripts - skrypty narzędziowe
+
+Katalogi tymczasowe (tworzone przez make):
+ out - pliki wyjściowe programów
+ indent - pliki źródłowe przetworzone przez program indent
+ postscript - pliki postscript gotowe do druku
+
+Pliki:
+ grafy.cpp - algorytmy grafowe :
+   - dijkstra, bellman-ford
+   - floyd-warshall
+   - kruskal, prim
+   - union-find
+   - dfs, bfs
+   - hopcroft-karp (skojarzenia w grafach dwudzielnych)
+   - kolorowanie grafu
+   - funkcja low, mosty, punkty artykulacji
+ tekst.cpp - algorytmy dynamiczne i tekstowe
+   - levenshtein distance
