@@ -13,6 +13,7 @@ Katalogi tymczasowe (tworzone przez make):
 
 Pliki:
  grafy.cpp - algorytmy grafowe :
+   - Vt, Et, Gt - typy do pracy z grafami
    - dijkstra, bellman-ford
    - floyd-warshall
    - kruskal, prim
@@ -23,3 +24,7 @@ Pliki:
    - funkcja low, mosty, punkty artykulacji
  tekst.cpp - algorytmy dynamiczne i tekstowe
    - levenshtein distance
+ geom.cpp - algorytmy geometrii obliczeniowej
+   - Pt - typ do pracy z punktami
+   - area - obliczanie powierzchni iloczynami wektorowymi
+   - graham_hull - znajdowanie otoczki wypukłej
