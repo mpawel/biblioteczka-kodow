@@ -12,7 +12,7 @@ all: doc/kody.pdf
 #indent/geom.cpp : geom.cpp
 #	indent < $< > $@
 
-doc/kody.pdf: grafy.hpp tekst.hpp geom.hpp
+doc/kody.pdf: *.hpp
 	pdflatex -interaction=batchmode -output-directory=doc kody.tex
 
 test:
