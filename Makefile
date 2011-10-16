@@ -1,13 +1,19 @@
-all:
-	mkdir -p indent
-	indent < grafy.cpp > indent/grafy.cpp
-	indent < tekst.cpp > indent/tekst.cpp
-	mkdir -p postscript
-	enscript indent/grafy.cpp --output=postscript/grafy.ps --color=1 --highlight=cpp --style=emacs_verbose -X latin2 -b "||grafy.cpp"
-	enscript indent/tekst.cpp --output=postscript/tekst.ps --color=1 --highlight=cpp --style=emacs_verbose -X latin2 -b "||tekst.cpp"
+all: doc/kody.pdf
+#	mkdir -p indent
+#	indent < tekst.cpp > indent/tekst.cpp
+#	mkdir -p postscript
+#	enscript indent/grafy.cpp --output=postscript/grafy.ps --color=1 --highlight=cpp --style=emacs_verbose -X latin2 -b "||grafy.cpp"
+#	enscript indent/tekst.cpp --output=postscript/tekst.ps --color=1 --highlight=cpp --style=emacs_verbose -X latin2 -b "||tekst.cpp"
 
-show:
-	# TODO: Odpalić dotshow.py, przetworzyć plik wejściowy i wyświetlić graf podany jako parametr
+#indent/grafy.cpp : grafy.cpp
+#	indent < $< > $@
+#indent/tekst.cpp : tekst.cpp
+#	indent < $< > $@
+#indent/geom.cpp : geom.cpp
+#	indent < $< > $@
+
+doc/kody.pdf: grafy.hpp tekst.hpp geom.hpp
+	pdflatex -interaction=batchmode -output-directory=doc kody.tex
 
 test:
 	mkdir -p bin
@@ -20,4 +26,4 @@ test:
 	./bin/tekst
 
 clean:
-	rm -rf indent postscript bin out
+	rm -rf indent/* postscript bin out doc/*
