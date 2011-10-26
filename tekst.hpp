@@ -4,6 +4,9 @@
 #include <climits>
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
+#include <stdint.h>
+
 
 using namespace std;
 
@@ -67,4 +70,64 @@ int kmp_search(char* S, char* W) {
   }
   delete[] T;
   return m + i;
+}
+
+void make_delta1(int *delta1, uint8_t *pat, int patlen) {
+  for (int i=0; i < 256; i++) delta1[i] = patlen;
+  for (int i=0; i < patlen; i++) delta1[pat[i]] = patlen-1 - i;
+}
+
+int is_prefix(uint8_t *word, int wordlen, int pos) {
+    int i;
+    int suffixlen = wordlen - pos;
+    for (i = 0; (i < suffixlen) && (word[i] == word[pos + i]); i++);
+    return !(i < suffixlen);
+}
+ 
+int suffix_length(uint8_t *word, int wordlen, int pos) { // długość najdłuższego prefiksu kończącego się na danej pozycji
+    int i;
+    for (i = 0; (word[pos-i] == word[wordlen-1-i]) && (i < pos); i++);
+    return i;
+}
+
+void make_delta2(int *delta2, uint8_t *pat, int32_t patlen) {
+  int p;
+  int last_prefix_index = patlen-1;
+ 
+  for (p=patlen-1; p>=0; p--) {
+    if (is_prefix(pat, patlen, p+1)) last_prefix_index = p+1;
+    else ++last_prefix_index;
+        
+    delta2[p] = last_prefix_index;
+  }
+ 
+  for (p=0; p < patlen-1; p++) {
+    int slen = suffix_length(pat, patlen, p);
+    delta2[patlen-1 - slen] = patlen-1 - p + slen;
+  }
+}
+ 
+int boyer_moore (uint8_t *string, uint32_t stringlen, uint8_t *pat, uint32_t patlen) {
+  int i;
+  int delta1[256];
+  int *delta2 = new int[patlen];
+  make_delta1(delta1, pat, patlen);
+  make_delta2(delta2, pat, patlen);
+ 
+  i = patlen-1;
+  while (i < stringlen) {
+    int j = patlen-1;
+    while (j >= 0 && (string[i] == pat[j])) {
+      --i;
+      --j;
+    }
+    if (j < 0) {
+      delete[] delta2;
+      return i+1;
+    }
+ 
+    i += max(delta1[string[i]], delta2[j]);
+  }
+  delete[] delta2;
+  return -1;
 }
