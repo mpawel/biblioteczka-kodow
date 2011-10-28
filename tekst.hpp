@@ -1,5 +1,6 @@
 #include <vector>
 #include <queue>
+#include <string>
 #include <algorithm>
 #include <climits>
 #include <cstdio>
@@ -17,8 +18,8 @@ template<class T>
 struct arr2 {
   T* a;
   int x, y;
-  arr2(int _x, int _y): x(_x), y(_y) { a = new T[x*y]; }
-  ~arr2() { /*delete[] a;*/ }
+  arr2(int _x, int _y): x(_x), y(_y), a(new T[x*y]) { }
+  ~arr2() { /* delete[] a; */ }
   T& operator()(int px, int py) { return a[px*x + py]; }
 };
 
@@ -39,6 +40,37 @@ int edist(T* s, int m, T* t, int n) {
       }
     }
   }
+  int ret = d(m,n);
+  return ret;
+}
+
+template<class T>
+int lcs(T* x, int m, T* y, int n) { // longest common subsequence
+  arr2<int> d(m+1,n+1);
+  for (int i=0; i<=m; ++i) d(i, 0) = 0;
+  for (int j=0; j<=n; ++j) d(0, j) = 0;
+
+  for (int i=1; i<=m; ++i) {
+    for (int j=1; j<=n; ++j) {
+      if (x[i-1] == y[j-1]) {
+	d(i,j) = d(i-1, j-1) + 1;
+      } else {
+	d(i,j) = max(d(i-1,j), d(i, j-1));
+      }
+    }
+  }
+  /*
+  printf("       ");
+  for (int j=0; j<n; ++j) printf("%2c ", y[j]);
+  printf("\n");
+
+  for (int i=0; i<=m; ++i) {
+    if(i) printf("%2c: ", x[i-1]);
+    else printf("    ");
+    for (int j=0; j<=n; ++j) printf("%2d ", d(i,j));
+    printf("\n");
+  }
+  */
   int ret = d(m,n);
   return ret;
 }
@@ -129,5 +161,43 @@ int boyer_moore (uint8_t *string, uint32_t stringlen, uint8_t *pat, uint32_t pat
     i += max(delta1[string[i]], delta2[j]);
   }
   delete[] delta2;
+  return -1;
+}
+
+uint64_t large_prime = 18446744073709551557ull;
+
+const unsigned PRIME_BASE = 257;
+const unsigned PRIME_MOD = 1000000007;
+
+unsigned hash_str(const string& s)
+{
+    long long ret = 0;
+    for (int i = 0; i < s.size(); i++) {
+    	ret = ret*PRIME_BASE + s[i];
+    	ret %= PRIME_MOD;
+    }
+    return ret;
+}
+
+int rabin_karp(const string& needle, const string& haystack) {
+  long long hash1 = hash_str(needle);
+  long long hash2 = 0;
+
+  long long power = 1;
+  for (int i = 0; i < needle.size(); i++)
+    power = (power * PRIME_BASE) % PRIME_MOD;
+
+  for (int i = 0; i < haystack.size(); i++) {
+    hash2 = hash2*PRIME_BASE + haystack[i];
+    hash2 %= PRIME_MOD;
+
+    if (i >= needle.size()) {
+      hash2 -= power * haystack[i-needle.size()] % PRIME_MOD;
+      if (hash2 < 0) hash2 += PRIME_MOD;
+    }
+
+    if (i >= needle.size()-1 && hash1 == hash2) return i - (needle.size()-1);
+  }
+
   return -1;
 }

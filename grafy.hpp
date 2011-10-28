@@ -1,9 +1,12 @@
 #include <vector>
 #include <queue>
+#include <map>
 #include <algorithm>
 #include <climits>
 #include <cstdio>
 #include <cstring>
+#include <stack>
+
 
 using namespace std;
 typedef unsigned long long ull;
@@ -252,6 +255,32 @@ int bfs() {
   return 0;
 }
 
+struct topo_sort {
+  Gt *g;
+  int *nums, *ins;
+  topo_sort(Gt* g_): g(g_), nums(new int[g->size()]), ins(new int[g->size()]) {}
+  ~topo_sort() { delete[] nums; delete[] ins; }
+  void run() {
+    std::stack<int> s;
+    int cnt = 0;
+    for (int i=0; i<g->size(); ++i) {
+      ins[i] = g->v[i].in.size();
+      nums[i] = -1;
+      if(ins[i] == 0) s.push(i);
+    }
+    while(s.size()) {
+      int p = s.top();
+      nums[p] = cnt++;
+      s.pop();
+      for (int i=0; i < (g->v[p].out.size()); ++i) {
+	int o = g->v[p].out[i]->to;
+	--ins[o];
+	if(ins[o] == 0) s.push(o);
+      }
+    }
+  }
+};
+
 int paint2(int* vc) {
   queue<int> Q;
   for (int i=0; i<G.size(); ++i) vc[i] = 0;
@@ -447,6 +476,57 @@ int low() {
     }
   }
 }
+
+struct max_flow {
+  Gt* g;
+  map<Et*, int> f; // maksymalny przepływ
+  map<Et*, int> r; // sieć rezydualna
+  max_flow(Gt* g_): g(g_), f(), r() {}
+  void edmonds_karp(int s, int t) {
+    f.clear();
+    r.clear();
+    for (int i=0; i<g->e.size(); ++i) {
+      Et* e = g->e[i];
+      f.insert(make_pair(e, 0));
+      r.insert(make_pair(e, e->cost));
+    }
+    while(1) {
+      queue<int> q;
+      Et** prev = new Et*[g->size()];
+      for (int i=0; i<g->size(); ++i) {
+	prev[i] = 0;
+      }
+      q.push(s);
+    bfs:
+      while(q.size()) {
+	int c = q.front();
+	q.pop();
+	if(c == t) break;
+	for (int i=0; i<g->v[c].out.size(); ++i) {
+	  Et* e = g->v[c].out[i];
+	  if(r[e] <= 0) continue;
+	  if(prev[e->to] == 0) {
+	    q.push(e->to);
+	    prev[e->to] = e;
+	  }
+	}
+      }
+      if(prev[t] == 0) {
+	break;
+      } else {
+	int a = INT_MAX;
+	for (Et* e = prev[t]; e; e = prev[e->from]) {
+	  a = min(a, r[e]);
+	}
+	for (Et* e = prev[t]; e; e = prev[e->from]) {
+	  f[e] += a;
+	  r[e] -= a;
+	}
+      }
+      delete[] prev;
+    }
+  }
+};
 
 void show_graph() {
   for (int i=0; i<G.size(); ++i) {

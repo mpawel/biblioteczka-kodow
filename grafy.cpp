@@ -57,6 +57,26 @@ int main(int argc, char *argv[])
     delete[] bell_prevs, djks_prevs, bell_dists, djks_dists;
     puts("Najkrótsze ścieżki: OK");
 
+
+    topo_sort ts(&G);
+    ts.run();
+    printf("Porządek topologiczny:\n");
+    for (int i=0; i<ts.g->size(); ++i) {
+      printf("%2d -> %2d\n", i+1, ts.nums[i]);
+    }
+
+    max_flow mf(&G);
+    mf.edmonds_karp(0, 7);
+
+    printf("Maksymalny przepływ:\n");
+    map<Et*, int>::iterator ec_iter;
+    for (ec_iter = mf.f.begin(); ec_iter != mf.f.end(); ++ec_iter) {
+      Et* e = ec_iter->first;
+      int val = ec_iter->second;
+      printf("%2d -> %2d: %2d\n", e->from+1, e->to+1, val);
+    }
+    
+
     int esize = G.e.size();
     for (int i=0; i<esize; ++i) { // Konwersja do grafu nieskierowanego
       Et* e = G.e[i];
@@ -78,7 +98,7 @@ int main(int argc, char *argv[])
       return -1;
     }
     delete[] krusk_mst, prim_mst;
-    puts("Drzewa rozpinające: OK");
+    printf("Drzewa rozpinające: OK (%d)\n", prim_cost);
 
     dfs(0);
     bfs();
@@ -92,6 +112,7 @@ int main(int argc, char *argv[])
     h.run();
     puts("Pokrycie krawędziowe: OK (chyba)");
     low();
+
   }
   return 0;
 }
